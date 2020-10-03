@@ -209,17 +209,23 @@ def figure_five():
 	mass_2sl = [0.413609973, 0.413609973, 5.500000000000000444e-01, 5.500000000000000444e-01]
 	mix_2sl = [1e-7, 1.619367485293161006e-10, 1.619367485293161006e-10, 1e-13]
 
+	# mass_2sl, mix_2sl = get_mass_mix(FD_min2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_minus2sigma.txt')
+	mass_2sl_i, mix_2sl_i = get_mass_mix_nointerp(FD_min2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_minus2sigma.txt')
+
 	mass_2su, mix_2su = get_mass_mix(FD_plus2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_plus2sigma.txt')
 	mass_2su_i, mix_2su_i = get_mass_mix_nointerp(FD_plus2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_plus2sigma.txt')
 
 	over_mass, over_mix = np.loadtxt('Sterile_Data/DM_overproduction.txt', unpack=True)
+
+	xray_mass, logxray_mix = np.loadtxt('Sterile_Data/RP_sterile_X-ray.txt', unpack=True)
+	lyman_mass, loglyman_mix = np.loadtxt('Sterile_Data/RP_sterile_Lyman-alpha.txt', unpack=True)
 
 
 	xlabel, ylabel = r'$m_{\mathrm{s}}\,\mathrm{[keV]}$', r'$\sin^2 2\theta$'
 
 	plt.figure()
 	ymin, ymax = 1e-13, 1e-7
-	xmin, xmax = 0.3, max(bbn_m_arr)
+	xmin, xmax = 0.3, 10.0
 	plt.xlim(xmin, xmax)
 	plt.ylim(ymin, ymax)
 	plt.xlabel(xlabel)
@@ -231,26 +237,39 @@ def figure_five():
 	plt.plot(mass_mid, mix_mid, color=blue, lw=1.8, alpha=0.9, zorder=2)
 	plt.plot(mass_mid, mix_mid, color='k', lw=1.8, alpha=0.3, zorder=2)
 
-	plt.fill_betweenx(mix_2sl, np.repeat(xmin, len(mass_2sl)), mass_2sl, color='w', facecolor='w', edgecolor=blue, hatch='xxx', linewidths=0.0, alpha=0.3, zorder=1)
+	plt.fill_betweenx(mix_2sl_i, np.repeat(xmin, len(mass_2sl_i)), mass_2sl_i, color='w', facecolor='w', edgecolor=blue, hatch='xxx', linewidths=0.0, alpha=0.3, zorder=1)
 
 	plt.fill(np.append(mass_1sl, mass_1su[::-1]), np.append(mix_1sl, mix_1su[::-1]), alpha=0.7, color="#4888B0", linewidth=0.0)
-	plt.fill(np.append(mass_2sl, mass_2su[::-1]), np.append(mix_2sl, mix_2su[::-1]), alpha=0.4, color="#4888B0", linewidth=0.0)
-	plt.fill(np.append(mass_2sl, mass_2su[::-1]), np.append(mix_2sl, mix_2su[::-1]), color='none', facecolor='none', edgecolor='w', hatch='xxx', alpha=0.1, zorder=3)
+	plt.fill(np.append(mass_2sl_i, mass_2su[::-1]), np.append(mix_2sl_i, mix_2su[::-1]), alpha=0.4, color="#4888B0", linewidth=0.0)
+	plt.fill(np.append(mass_2sl_i, mass_2su[::-1]), np.append(mix_2sl_i, mix_2su[::-1]), color='none', facecolor='none', edgecolor='w', hatch='xxx', alpha=0.1, zorder=3)
 
 	plt.plot(over_mass, over_mix, lw=1.8, zorder=0, color='k')
 	plt.fill_between(over_mass, over_mix, np.repeat(ymax, len(over_mix)), alpha=0.3, color='gray', zorder=0)
+
+	plt.plot(xray_mass, 10**(logxray_mix), lw=1.8, zorder=0, color='forestgreen')
+	plt.fill_between(xray_mass, 10**(logxray_mix), np.repeat(ymax, len(xray_mass)), alpha=0.3, color='forestgreen', zorder=0)
+
+	plt.plot(lyman_mass, 10**(loglyman_mix), lw=1.8, zorder=0, color='darkred', ls=(1, (5, 1)))
 
 
 	plt.gca().set_zorder(9)
 	plt.xscale('log')
 	plt.yscale('log')
-	plt.text(3.05, 4.5e-13, 'BBN', rotation=-21, color='purple', fontsize=12)
+	plt.gca().set_xticks([1, 10])
+	plt.gca().set_xticklabels([r'$1$', r'$10$'])
+	plt.text(3.05, 4.5e-13, 'BBN', rotation=-20, color='purple', fontsize=12)
 	plt.annotate('', xy=(0.5, 1.09e-11), xytext=(0.9, 1e-10), 
             arrowprops=dict(facecolor='k', alpha=1.0, width=1.0, headwidth=5.0, headlength=5.0),
             )
-	plt.text(5, 5e-10, r'$\Omega_{\mathrm{s}} > \Omega_{\mathrm{dm}}$', rotation=-24, color='k', fontsize=12)
-	plt.text(0.52, 2.1e-11, r'$\mathrm{Excluded}$', rotation=45, fontsize=12)
-	plt.text(1.7, 1.7e-11, 'Phase-Space', color=blue, rotation=-52, fontsize=12)
+	plt.text(1.7, 3.5e-9, r'$\Omega_{\mathrm{s}} > \Omega_{\mathrm{dm}}$', rotation=-22, color='k', fontsize=12)
+	plt.text(0.52, 2.1e-11, r'$\mathrm{Excluded}$', rotation=42, fontsize=12)
+	plt.text(1.7, 1.7e-11, 'Phase-Space', color=blue, rotation=-49, fontsize=12)
+	plt.text(2.35, 1e-8, r'X-ray', rotation=-56, fontsize=12, color='forestgreen')
+	plt.text(3.9, 3e-11, r'Lyman-$\alpha$', rotation=-67, fontsize=10, color='darkred')
+	plt.text(3.45, 1.7e-11, r'(Disfavoured)', rotation=-67, fontsize=10, color='darkred')
+	plt.annotate('', xy=(5.0, 8e-13), xytext=(6.0, 1e-12), 
+            arrowprops=dict(facecolor='k', alpha=1.0, width=1.0, headwidth=5.0, headlength=5.0),
+            )
 	plt.savefig('Plots/RP_sterile.pdf')
 
 def figure_six():
