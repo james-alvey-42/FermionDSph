@@ -160,7 +160,7 @@ def figure_four(FM, FG):
 	plt.figure()
 
 	plt.xlabel(r'$m\,\mathrm{[keV]}$')
-	plt.ylabel(r'$f_{\mathrm{max}} \, \mathrm{(in}\,\mathrm{Nat.}\, \mathrm{Units)}$')
+	plt.ylabel(r'$f_{\mathrm{max}} \, \mathrm{(in}\,\mathrm{nat.}\, \mathrm{units)}$')
 
 	m_arr = np.geomspace(0.1, 10.0, 1000)
 
@@ -206,11 +206,20 @@ def figure_five():
 	mass_1sl_i, mix_1sl_i = get_mass_mix_nointerp(FD_min1sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_minus1sigma.txt')
 	mass_1su_i, mix_1su_i = get_mass_mix_nointerp(FD_plus1sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_plus1sigma.txt')
 
-	mass_2sl = [0.413609973, 0.413609973, 5.500000000000000444e-01, 5.500000000000000444e-01]
-	mix_2sl = [1e-7, 1.619367485293161006e-10, 1.619367485293161006e-10, 1e-13]
+	# mass_2sl = [0.413609973, 0.413609973, 5.500000000000000444e-01, 5.500000000000000444e-01]
+	# mix_2sl = [1e-7, 1.619367485293161006e-10, 1.619367485293161006e-10, 1e-13]
 
-	# mass_2sl, mix_2sl = get_mass_mix(FD_min2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_minus2sigma.txt')
-	mass_2sl_i, mix_2sl_i = get_mass_mix_nointerp(FD_min2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_minus2sigma.txt')
+	#mass_2sl, mix_2sl = get_mass_mix(FD_min2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_minus2sigma.txt')
+	# mass_2sl_i, mix_2sl_i = get_mass_mix_nointerp(FD_min2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_minus2sigma.txt')
+
+	mass_2sl_data = np.loadtxt('Sterile_Data/RP_sterile_Gaussiancoarse_minus2sigma.txt')
+	func_2sl = interp1d(mass_2sl_data[:, 0], mass_2sl_data[:, 1], kind='quadratic', fill_value='extrapolate')
+	mass_2sl = np.geomspace(FD_min2sig, max(mass_2sl_data[:, 0]), 1000)
+	mix_2sl = func_2sl(mass_2sl)
+	mass_2sl = np.append(mass_2sl, mass_2sl[-1])
+	mix_2sl = np.append(mix_2sl, 1e-13)
+	mass_2sl = np.append(FD_min2sig, mass_2sl)
+	mix_2sl = np.append(1e-7, mix_2sl)
 
 	mass_2su, mix_2su = get_mass_mix(FD_plus2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_plus2sigma.txt')
 	mass_2su_i, mix_2su_i = get_mass_mix_nointerp(FD_plus2sig, 'Sterile_Data/RP_sterile_Gaussiancoarse_plus2sigma.txt')
@@ -232,24 +241,27 @@ def figure_five():
 	plt.ylabel(ylabel)
 
 	plt.plot(bbn_m_arr, bbn_mix_arr, color=purple, lw=1.8, zorder=0)
-	plt.fill_between(bbn_m_arr, np.repeat(ymin, len(bbn_m_arr)), bbn_mix_arr, color='w', facecolor='w', edgecolor=purple, hatch='///', linewidths=0.0, alpha=0.4, zorder=0)
+	plt.fill_between(bbn_m_arr, np.repeat(ymin, len(bbn_m_arr)), bbn_mix_arr, color=purple, linewidths=0.0, alpha=0.4, zorder=0)
 
 	plt.plot(mass_mid, mix_mid, color=blue, lw=1.8, alpha=0.9, zorder=2)
 	plt.plot(mass_mid, mix_mid, color='k', lw=1.8, alpha=0.3, zorder=2)
 
-	plt.fill_betweenx(mix_2sl_i, np.repeat(xmin, len(mass_2sl_i)), mass_2sl_i, color='w', facecolor='w', edgecolor=blue, hatch='xxx', linewidths=0.0, alpha=0.3, zorder=1)
+	plt.fill_betweenx(mix_2sl, np.repeat(xmin, len(mass_2sl)), mass_2sl, color='w', facecolor='w', edgecolor=blue, hatch='xxx', linewidths=0.0, alpha=0.3, zorder=1)
 
 	plt.fill(np.append(mass_1sl, mass_1su[::-1]), np.append(mix_1sl, mix_1su[::-1]), alpha=0.7, color="#4888B0", linewidth=0.0)
-	plt.fill(np.append(mass_2sl_i, mass_2su[::-1]), np.append(mix_2sl_i, mix_2su[::-1]), alpha=0.4, color="#4888B0", linewidth=0.0)
-	plt.fill(np.append(mass_2sl_i, mass_2su[::-1]), np.append(mix_2sl_i, mix_2su[::-1]), color='none', facecolor='none', edgecolor='w', hatch='xxx', alpha=0.1, zorder=3)
+	plt.fill(np.append(mass_2sl, mass_2su[::-1]), np.append(mix_2sl, mix_2su[::-1]), alpha=0.4, color="#4888B0", linewidth=0.0)
+	plt.fill(np.append(mass_2sl, mass_2su[::-1]), np.append(mix_2sl, mix_2su[::-1]), color='none', facecolor='none', edgecolor='w', hatch='xxx', alpha=0.1, zorder=3)
 
-	plt.plot(over_mass, over_mix, lw=1.8, zorder=0, color='k')
-	plt.fill_between(over_mass, over_mix, np.repeat(ymax, len(over_mix)), alpha=0.3, color='gray', zorder=0)
+	plt.plot(over_mass, over_mix, lw=1.8, zorder=0, color='#353535')
+	plt.fill_between(over_mass, over_mix, np.repeat(ymax, len(over_mix)), alpha=0.3, color='#353535', zorder=0)
 
-	plt.plot(xray_mass, 10**(logxray_mix), lw=1.8, zorder=0, color='forestgreen')
-	plt.fill_between(xray_mass, 10**(logxray_mix), np.repeat(ymax, len(xray_mass)), alpha=0.3, color='forestgreen', zorder=0)
+	xray_color = '#12664F'
+	lyman_color = '#A20111'
 
-	plt.plot(lyman_mass, 10**(loglyman_mix), lw=1.8, zorder=0, color='darkred', ls=(1, (5, 1)))
+	plt.plot(xray_mass, 10**(logxray_mix), lw=1.8, zorder=0, color=xray_color)
+	plt.fill_between(xray_mass, 10**(logxray_mix), np.repeat(ymax, len(xray_mass)), alpha=0.3, color=xray_color, zorder=0)
+
+	plt.plot(lyman_mass, 10**(loglyman_mix), lw=1.8, zorder=0, color=lyman_color, ls=(1, (5, 1)))
 
 
 	plt.gca().set_zorder(9)
@@ -257,18 +269,32 @@ def figure_five():
 	plt.yscale('log')
 	plt.gca().set_xticks([1, 10])
 	plt.gca().set_xticklabels([r'$1$', r'$10$'])
-	plt.text(3.05, 4.5e-13, 'BBN', rotation=-20, color='purple', fontsize=12)
+	plt.text(3.9, 1.45e-13, 'BBN', rotation=-20, color='purple', fontsize=12)
 	plt.annotate('', xy=(0.5, 1.09e-11), xytext=(0.9, 1e-10), 
             arrowprops=dict(facecolor='k', alpha=1.0, width=1.0, headwidth=5.0, headlength=5.0),
             )
-	plt.text(1.7, 3.5e-9, r'$\Omega_{\mathrm{s}} > \Omega_{\mathrm{dm}}$', rotation=-22, color='k', fontsize=12)
+	plt.text(1.6, 3.9e-9, r'$\Omega_{\mathrm{s}} > \Omega_{\mathrm{dm}}$', rotation=-22, color='#353535', fontsize=12)
 	plt.text(0.52, 2.1e-11, r'$\mathrm{Excluded}$', rotation=42, fontsize=12)
-	plt.text(1.7, 1.7e-11, 'Phase-Space', color=blue, rotation=-49, fontsize=12)
-	plt.text(2.35, 1e-8, r'X-ray', rotation=-56, fontsize=12, color='forestgreen')
-	plt.text(3.9, 3e-11, r'Lyman-$\alpha$', rotation=-67, fontsize=10, color='darkred')
-	plt.text(3.45, 1.7e-11, r'(Disfavoured)', rotation=-67, fontsize=10, color='darkred')
-	plt.annotate('', xy=(5.0, 8e-13), xytext=(6.0, 1e-12), 
-            arrowprops=dict(facecolor='k', alpha=1.0, width=1.0, headwidth=5.0, headlength=5.0),
+	plt.text(1.76, 1.7e-11, 'Phase-space', color=blue, rotation=-51, fontsize=12)
+	plt.text(2.35, 1e-8, r'X-ray', rotation=-56, fontsize=12, color=xray_color)
+	plt.text(3.6, 9e-12, r'Ly-$\alpha$ disfavoured', rotation=-70, fontsize=12, color=lyman_color)
+	#plt.text(3.45, 1.7e-11, r'(Disfavoured)', rotation=-67, fontsize=10, color='#A20111')
+	mkev = 7.130418151719433
+	mix_high, mix_mid, mix_low = 10**(-9.850358422939069), 10**(-10.302867383512556), 10**(-10.77329749103945)
+	plt.errorbar([mkev], [mix_mid], yerr = [[mix_mid - mix_low], [mix_high - mix_mid]], ecolor='#E8A01C', elinewidth=1.4, capthick=1.4, zorder=3)
+	plt.errorbar([mkev], [mix_mid], yerr = [[mix_mid - mix_low], [mix_high - mix_mid]], ecolor='k', elinewidth=1.7, capthick=1.7, zorder=2, capsize=3.2)
+	plt.scatter([mkev], [mix_mid], 
+			marker='*'
+			,
+			c='#E8A01C',
+			alpha=1.0, 
+			s=150,
+			linewidths=0.3,
+			edgecolors='k',
+			zorder=9
+			)
+	plt.annotate('', xy=(4.8, 4.5e-12), xytext=(5.8, 6e-12), 
+            arrowprops=dict(facecolor=lyman_color, edgecolor=lyman_color, alpha=1.0, width=1.0, headwidth=4.0, headlength=5.0, linewidth=0.0),
             )
 	plt.savefig('Plots/RP_sterile.pdf')
 
@@ -300,7 +326,7 @@ def figure_six():
 	    next(reader, None) 
 	    data_NRP_Max = [row for row in reader]
 
-	dwarf_names = [r"$\mathrm{UMi}$",r"$\mathrm{Sextans}$",r"$\mathrm{Seg\, I}$",r"$\mathrm{Sculptor}$", r"$\mathrm{Leo\, II}$", r"$\mathrm{Leo\, I}$", r"$\mathrm{Fornax}$", r"$\mathrm{Draco}$",r"$\mathrm{Carina}$", r"$\mathrm{CVnl}$", r"$\mathrm{And21}$"]
+	dwarf_names = [r"$\mathrm{UMi}$",r"$\mathrm{Sextans}$",r"$\mathrm{Seg\, I}$",r"$\mathrm{Sculptor}$", r"$\mathrm{Leo\, II}$", r"$\mathrm{Leo\, I}$", r"$\mathrm{Fornax}$", r"$\mathrm{Draco}$",r"$\mathrm{Carina}$", r"$\mathrm{CVn\, I}$", r"$\mathrm{And21}$"]
 
 	data_deg = np.array(data_deg)
 	data_deg = np.array(data_deg)[np.argsort(data_deg[:,0]),1:].astype(np.float)[::-1]
@@ -338,7 +364,7 @@ def figure_six():
 
 	############################## plots ##############################
 
-	plt.figure(figsize=(12,8))
+	plt.figure(figsize=(12,7))
 
 	ax1 = plt.subplot(1,3,1)
 	ax2 = plt.subplot(1,3,2)
@@ -394,7 +420,7 @@ def figure_six():
 
 	plt.subplots_adjust(wspace = 0.15)
 
-	grad_colors = ['#4888B0', '#5082AD', '#587CAA', '#6076A7', '#6870A4', '#716AA1', '#79639E', '#815D9B', '#895798', '#915195', '#994B92']
+	grad_colors = ['#4888B0', '#4888B0', '#5181AD', '#5A7AA9', '#6374A6', '#6C6DA3', '#75669F', '#7E5F9C', '#875999', '#905295', '#994B92']
 
 	for ax in [ax1,ax2,ax3]:
 	    for num in ytickpos:
@@ -435,10 +461,12 @@ def figure_six():
 	            ax.fill_between([data_deg[num-1,0], data_deg[num-1,0]], num+0.7*width, num-0.7*width, color=color1,alpha=0.9)
 
 
-	        if ax == ax2:
+	        if ax == ax2 and num != 11:
 	            ax.text(0.0162, num + textoffset, r'$\mathrm{Max.}$', fontsize=textsize, alpha=0.7, weight="bold")
 	            ax.text(0.0162, num - 2*textoffset, r'$\mathrm{Gauss.}$', fontsize=textsize, alpha=0.7, weight="bold")
 
+	for ax in [ax1, ax2, ax3]:
+		ax.set_ylim(0.5, 10.5)
 	plt.savefig("Plots/Bounds_summary.pdf")
 
 
